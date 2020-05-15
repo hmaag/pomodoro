@@ -1,138 +1,100 @@
 import React from 'react';
 import Timer from './Timer';
-import Buttons from './Buttons';
-import Audio from './Audio';
 
 class App extends React.Component {
 
     constructor () {
         super()
         this.state = {
-            running: false,
-            id: 0,
-            currentTime: "25 : 00",
-            sessionStatus: 'Working',
-            workTime: 25,
-            breakTime: 5,
-            audio: 'on'
+            timerRunning: false,
+            breakRunning: false,
+            minutesLeft: '25',
+            secondsLeft: '00',
+            workLength: 25,
+            breakLength: 5
         }
     }
 
-    setAudio = (audio) => {
+    toggleTimer = () => {
+        const timerStatus = this.state.timerRunning;
         this.setState({
-            audio: audio
-        })
-    }
-
-    incrementWorkTime = () => {
-        this.setState({
-            workTime: this.state.workTime + 1
-        })
-
-        this.setTime(this.state.workTime);
-    }
-
-    decrementWorkTime = () => {
-        this.setState({
-            workTime: this.state.workTime - 1
-        })
-
-        this.setTime(this.state.workTime);
-    }
-
-    incrementBreakTime = () => {
-        this.setState({
-            breakTime: this.state.breakTime + 1
-        })
-
-        this.setTime(this.state.breakTime);
-    }
-
-    decrementBreakTime = () => {
-        this.setState({
-            breakTime: this.state.breakTime - 1
-        })
-
-        this.setTime(this.state.breakTime);
-    }
-
-    setTime = (time) => {
-        this.setState({
-            currentTime: `${time} : 00`
-        })
-    }
-
-    toggleRunning = () => {
-        if (this.state.running === false) {
-            this.setState({
-                running: true
-            })
-        } else {
-            this.setState({
-                running: false
-            })
-        }
-    }
-
-    startTimer = (duration) => {
-        this.setState({
-            running: true
+            timerRunning: !timerStatus
         });
-        let time = duration * 60, minutes, seconds;
-        let runningTimer = setInterval(() => {
-            this.setState({
-                id: runningTimer
-            })
+        if (!timerStatus) {
+            this.createInterval();
+        } else {
+            clearInterval(this.intervalID);
+        }
+    }
 
-            minutes = Math.floor(time / 60);
-            seconds = time - minutes * 60;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
+    createInterval() {
+        this.intervalID = setInterval(this.decrementTimer, 1000);
+    }
 
-            this.setState({
-                currentTime: `${minutes} : ${seconds}`
-            });
-
-            if (this.state.sessionStatus === 'Working') {
-                this.setState({
-                    sessionStatus: 'Break',
-                    running: false
-                })
-                clearInterval(this.state.id);
-                this.startTimer(this.state.breakTime);
+    // Decrements by one second
+    decrementTimer = () => {
+        let newSecs = Number(this.state.secondsLeft);
+        let newMins = Number(this.state.minutesLeft);
+        if (newMins === 0 && newSecs === 0) {
+            if (!this.state.breakRunning) {
+              newMins = this.state.breakLength;
+              this.setState({
+                breakRunning: true,
+              });
             } else {
-                this.setState({
-                    sessionStatus: 'Working',
-                    running: false
-                })
-                clearInterval(this.state.id);
-                this.startTimer(this.state.workTime);
+              newMins = this.state.workLength;
+              this.setState({
+                breakRunning: false,
+              });
             }
-        }, 1000)
+        } else if (newSecs === 0) {
+            newMins--;
+            newSecs = 59;
+        } else {
+            newSecs--;
+        }
+
+        if (newSecs < 10) {
+            newSecs = `0${newSecs}`;
+        }
+
+        if (newMins < 10) {
+            newMins = `0${newMins}`;
+        }
+
+        this.setState({
+            secondsLeft: newSecs,
+            minutesLeft: newMins,
+        });
+    }
+
+    resetTimer = () => {
+        this.setState({
+            timerRunning: false,
+            breakRunning: false,
+            minutesLeft: '25',
+            secondsLeft: '00',
+            workLength: 25,
+            breakLength: 5
+        });
+        this.toggleTimer();
     }
 
     render() {
+        const style = {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+        }
         return (
-            <div className='ui container'>
-                <h1>Pomo Time</h1>
+            <div className='ui container segment'>
+                <h1 style={style} >It's Pomo Time</h1>
                 <Timer
-                    sessionStatus={this.state.sessionStatus}
-                    startTimer={this.startTimer} 
-                    currentTime={this.state.currentTime}
-                    running={this.state.running}
-                    setTime={this.setTime}
-                    toggleRunning={this.toggleRunning}
+                    minutesLeft={this.state.minutesLeft}
+                    secondsLeft={this.state.secondsLeft} 
+                    toggleTimer={this.toggleTimer}
+                    resetTimer={this.resetTimer}
                 />
-                <Buttons
-                    running={this.state.running}
-                    workTime={this.state.workTime}
-                    breakTime={this.state.breakTime}
-                    incrementWorkTime={this.incrementWorkTime}
-                    decrementWorkTime={this.decrementWorkTime}
-                    incrementBreakTime={this.incrementBreakTime}
-                    decrementBreakTime={this.decrementBreakTime}
-                />
-                <Audio setAudio={this.setAudio} audio={this.state.audio}/>
             </div>
         );
     }

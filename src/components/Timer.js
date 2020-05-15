@@ -1,5 +1,4 @@
 import React from 'react';
-//import './Timer.css';
 
 class Timer extends React.Component {
 
@@ -8,38 +7,47 @@ class Timer extends React.Component {
         resetIcon: 'redo icon'
     }
 
-    timer = () => {
+    toggleTimer = () => {
         if (this.state.toggleIcon === 'play icon') {
-            this.props.startTimer(this.props.currentTime);
+            this.props.toggleTimer();
             this.setState({
                 toggleIcon: 'pause icon'
             })
         } else {
-            this.props.toggleRunning();
+            this.props.toggleTimer();
             this.setState({
                 toggleIcon: 'play icon'
             })
         }
     }
 
-    reset = () => {
-        this.props.setTime('25 : 00');
+    resetTimer = () => {
+        this.setState({
+            toggleIcon: 'play icon'
+        });
+        this.props.resetTimer();
     }
 
     render() {
+        const style = {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+        }
         return (
             <div>
-                <span> {this.props.session} </span>
+                <span style={style}> {this.props.minutesLeft}:{this.props.secondsLeft} </span>
                 <br />
-                <span> {this.props.currentTime} </span>
-                <br />
-                <button className='ui icon button' onClick={this.timer}>
-                    <i className={this.state.toggleIcon} />
-                </button>
-                <button className='ui icon button' onClick={this.reset}>
-                    <i className={this.state.resetIcon} />
-                </button>
+                <div style={style}>
+                    <button className='ui icon button' onClick={this.toggleTimer}>
+                        <i className={this.state.toggleIcon} />
+                    </button>
+                    <button className='ui icon button' onClick={this.resetTimer}>
+                        <i className={this.state.resetIcon} />
+                    </button>
+                </div>
             </div>
+            
         )
     }
 }
