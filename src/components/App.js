@@ -1,5 +1,7 @@
 import React from 'react';
 import Timer from './Timer';
+import WorkButtons from './WorkButtons';
+import BreakButtons from './BreakButtons';
 
 class App extends React.Component {
 
@@ -12,6 +14,50 @@ class App extends React.Component {
             secondsLeft: '00',
             workLength: 25,
             breakLength: 5
+        }
+    }
+
+    incrementWork = () => {
+        if (this.state.workLength < 60) {
+            let newLength = this.state.workLength + 1;
+            let newMinLeft = newLength;
+            if (newMinLeft < 10) {
+                newMinLeft = `0${newMinLeft}`;
+            }
+            this.setState({
+                workLength: newLength,
+                minutesLeft: newMinLeft
+            });
+        }
+    }
+
+    decrementWork = () => {
+        if (this.state.workLength > 0) {
+            let newLength = this.state.workLength - 1;
+            let newMinLeft = newLength;
+            if (newMinLeft < 10) {
+                newMinLeft = `0${newMinLeft}`;
+            }
+            this.setState({
+                workLength: newLength,
+                minutesLeft: newMinLeft
+            });
+        }
+    }
+
+    incrementBreak = () => {
+        if (this.state.breakLength < 60) {
+            this.setState({
+                breakLength: this.state.breakLength + 1
+            });
+        }
+    }
+
+    decrementBreak = () => {
+        if (this.state.breakLength > 0) {
+            this.setState({
+                breakLength: this.state.breakLength - 1
+            });
         }
     }
 
@@ -33,8 +79,11 @@ class App extends React.Component {
 
     // Decrements by one second
     decrementTimer = () => {
+        // Convert remaining minutes and seconds to numbers
         let newSecs = Number(this.state.secondsLeft);
         let newMins = Number(this.state.minutesLeft);
+
+        // If we hit zero min/zero seconds, check if it's time for a break, or another working session
         if (newMins === 0 && newSecs === 0) {
             if (!this.state.breakRunning) {
               newMins = this.state.breakLength;
@@ -47,14 +96,15 @@ class App extends React.Component {
                 breakRunning: false,
               });
             }
-        } else if (newSecs === 0) {
+        } else if (newSecs === 0) { // Else, if seconds hit zero, flip them to 59 and decrement one minute
             newMins--;
             newSecs = 59;
-        } else {
+        } else { // Else, decrement one second
             newSecs--;
         }
 
-        if (newSecs < 10) {
+        // If seconds or minutes go below 10, add a 0 in front
+        if (newSecs < 10) { 
             newSecs = `0${newSecs}`;
         }
 
@@ -62,6 +112,7 @@ class App extends React.Component {
             newMins = `0${newMins}`;
         }
 
+        // Update the state
         this.setState({
             secondsLeft: newSecs,
             minutesLeft: newMins,
@@ -77,23 +128,36 @@ class App extends React.Component {
             workLength: 25,
             breakLength: 5
         });
-        this.toggleTimer();
+        clearInterval(this.intervalID);
     }
 
     render() {
         const style = {
+            marginTop: '50px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
         }
         return (
-            <div className='ui container segment'>
+            <div className='ui container'>
                 <h1 style={style} >It's Pomo Time</h1>
                 <Timer
                     minutesLeft={this.state.minutesLeft}
                     secondsLeft={this.state.secondsLeft} 
                     toggleTimer={this.toggleTimer}
                     resetTimer={this.resetTimer}
+                />
+                <br />
+                <WorkButtons 
+                    workLength={this.state.workLength}
+                    incrementWork={this.incrementWork}
+                    decrementWork={this.decrementWork}
+                />
+                <br />
+                <BreakButtons 
+                    breakLength={this.state.breakLength}
+                    incrementBreak={this.incrementBreak}
+                    decrementBreak={this.decrementBreak}
                 />
             </div>
         );
