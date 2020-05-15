@@ -1,17 +1,15 @@
 import React from 'react';
+//import './Timer.css';
 
-const Timer = () => {
-    let content = "I'm a timer";
-    return (
-        <div>
-            {content}
-        </div>
-    );
-};
-
-// TODO:
-// -Get a tomato svg to display
-// -Possible to have timer display within tomato?
-// -Potentially display progress bar or percentage completed?
+class Timer extends React.Component {
+    render() {
+        return (
+            <div className='timer'>
+                <span>TIMER</span>
+                <span>Current Session</span>
+            </div>
+        )
+    }
+}
 
 export default Timer;
